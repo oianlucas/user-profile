@@ -1,9 +1,9 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useParams } from 'react-router-dom'; // Import useParams here
-import Profile from './Profile'; // Import your Profile component
-import './App.css'; // Or the correct path to your CSS file
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useParams } from 'react-router-dom';
+import Profile from './components/Profile';
+import './App.css';
 
-// Users data with ian and gabriel
+// Users data
 const users = {
   ian: {
     name: 'Ian Paim',
@@ -43,24 +43,49 @@ const users = {
   },
 };
 
+// Loading screen component
+function LoadingScreen() {
+  return (
+    <div className="loading-container">
+      <img src="/ashlar.png" alt="Company Logo" className="loading-logo" />
+    </div>
+  );
+}
+
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFadeOut(true); // Trigger fade-out animation
+      setTimeout(() => {
+        setIsLoading(false); // Hide loading screen after fade-out
+      }, 500); // Match fade-out duration
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <div className={`loading-wrapper ${fadeOut ? 'fade-out' : ''}`}><LoadingScreen /></div>;
+  }
+
   return (
     <Router>
       <Routes>
-        {/* Dynamic Route to handle user profiles */}
         <Route path="/:username" element={<UserProfile />} />
       </Routes>
     </Router>
   );
 }
 
-// Create a component to handle user profile based on the username from the URL
 function UserProfile() {
-  const { username } = useParams(); // Extract the username from the URL
-  const user = users[username]; // Find the user data by the username
+  const { username } = useParams(); // Extract username from the URL
+  const user = users[username]; // Get the user data
 
   if (!user) {
-    return <div>User not found</div>; // If user doesn't exist
+    return <div>User not found</div>; // Handle case where user does not exist
   }
 
   return <Profile user={user} />; // Render the Profile component with the user data
